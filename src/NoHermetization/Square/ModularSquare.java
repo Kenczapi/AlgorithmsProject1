@@ -1,12 +1,18 @@
-package NoHermetization;
+package NoHermetization.Square;
 
-public class SimplifiedModularLinear<K, V> implements OpenAddressing<K, V> {
+import NoHermetization.Element;
+import NoHermetization.OpenAddressing;
+
+public class ModularSquare<K, V> implements OpenAddressing<K, V> {
 
     int size;
     Element[] table;
     int bucketsTaken = 0;
 
-    SimplifiedModularLinear(int size) {
+    private final int constant1 = 1;
+    private final int constant2 = 1;
+
+    public ModularSquare(int size) {
         this.size = size;
         this.table = new Element[size];
     }
@@ -21,13 +27,14 @@ public class SimplifiedModularLinear<K, V> implements OpenAddressing<K, V> {
         int hashValue = hashFunction((K) element.key);
 
         for (int i = 0; i < this.size; i++) {
-            if (this.table[(hashValue + i) % this.size] == null) {
-                this.table[(hashValue + i) % this.size] = element;
+            int pos = hashValue +  i * i;
+            if (this.table[pos % this.size] == null) {
+                this.table[pos % this.size] = element;
                 bucketsTaken++;
-                break;
+               return;
             }
         }
-
+        logger.info("Could not place Element(" + element.key + ", " + element.value + ").");
     }
 
     @Override
@@ -42,9 +49,6 @@ public class SimplifiedModularLinear<K, V> implements OpenAddressing<K, V> {
 
     @Override
     public int hashFunction(K key) {
-        //Taking just two first elements if length != 1, else just one element
-        if (key.toString().length() != 1)
-            return Math.abs(key.toString().substring(0, 2).hashCode() % this.size);
         return Math.abs(key.toString().hashCode() % this.size);
     }
 

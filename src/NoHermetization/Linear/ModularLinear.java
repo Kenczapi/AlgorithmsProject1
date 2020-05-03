@@ -1,12 +1,15 @@
-package NoHermetization;
+package NoHermetization.Linear;
 
-public class BernsteinLinear<K, V> implements OpenAddressing<K, V> {
+import NoHermetization.Element;
+import NoHermetization.OpenAddressing;
+
+public class ModularLinear<K, V> implements OpenAddressing<K, V> {
 
     int size;
     Element[] table;
     int bucketsTaken = 0;
 
-    BernsteinLinear(int size) {
+    public ModularLinear(int size) {
         this.size = size;
         this.table = new Element[size];
     }
@@ -24,10 +27,11 @@ public class BernsteinLinear<K, V> implements OpenAddressing<K, V> {
             if (this.table[(hashValue + i) % this.size] == null) {
                 this.table[(hashValue + i) % this.size] = element;
                 bucketsTaken++;
-                break;
+                return;
             }
         }
 
+        logger.info("Could not place Element(" + element.key + ", " + element.value + ").");
     }
 
     @Override
@@ -42,12 +46,7 @@ public class BernsteinLinear<K, V> implements OpenAddressing<K, V> {
 
     @Override
     public int hashFunction(K key) {
-        int hash = 5381; //initial hash
-        String s = key.toString();
-        for (int i = 0; i < s.length(); i++) {
-            hash = s.charAt(i) + ((hash << 5) - hash);
-        }
-        return Math.abs(hash);
+        return Math.abs(key.toString().hashCode()) % this.size;
     }
 
     @Override
